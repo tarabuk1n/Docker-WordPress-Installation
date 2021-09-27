@@ -12,14 +12,14 @@ services:
     container_name: mysql
     restart: unless-stopped
     environment:
-       - MYSQL_ROOT_PASSWORD=vagrant
-       - MYSQL_DATABASE=wpdatabase
-       - MYSQL_USER=wpuser
-       - MYSQL_PASSWORD=wppass123
+       - MYSQL_ROOT_PASSWORD=password #password for root user
+       - MYSQL_DATABASE=default #database name
+       - MYSQL_USER=user #mysql non root user
+       - MYSQL_PASSWORD=user_password #password for non-root user
     volumes:
-      - ./dbdata:/var/lib/mysql
+      - ./dbdata:/var/lib/mysql #local backup for database
     networks: 
-      - db_network 
+      - db_network #isolated network for database 
     
   wordpress:
     depends_on:
@@ -27,30 +27,31 @@ services:
     image: wordpress:5.8.1-fpm
     container_name: wordpress
     restart: unless-stopped
-    user: www-data
+    user: www-data #container user
     environment:
-      - WORDPRESS_DB_HOST=mysql
-      - WORDPRESS_DB_USER=wpuser
-      - WORDPRESS_DB_PASSWORD=wppass123
-      - WORDPRESS_DB_NAME=wpdatabase
+      - WORDPRESS_DB_HOST=mysql #database host
+      - WORDPRESS_DB_USER=user #mysql non root user
+      - WORDPRESS_DB_PASSWORD=user_password #password for non root user
+      - WORDPRESS_DB_NAME=default #database name for WordPress
     volumes:
-      - wordpress_data:/var/www/html
+      - wordpress_data:/var/www/html #saving container data 
     networks: 
-      - db_network 
-      - content_network
+      - db_network #isolated network for database
+      - content_network #isolated network for content
 
   nginx:
     depends_on: 
       - wordpress
-    build: nginx
+    build: nginx #build container from Dockerfile
+    restart: unless-stopped
     command: ["nginx", "-g", "daemon off;"]
     container_name: nginx
     ports: 
     - 80:80
     volumes:
-    - wordpress_data:/var/www/html
+    - wordpress_data:/var/www/htm #saving container data 
     networks:
-    - content_network
+    - content_network #isolated network for content
 volumes:
   db_data: {}
   wordpress_data: {}
