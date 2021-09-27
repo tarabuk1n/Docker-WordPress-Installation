@@ -1,0 +1,57 @@
+version: "3"
+
+networks:
+  db_network:
+    driver: bridge
+  content_network:
+    driver: bridge
+  
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+       - MYSQL_ROOT_PASSWORD=password #password for root user
+       - MYSQL_DATABASE=default #database name
+       - MYSQL_USER=user #mysql non root user
+       - MYSQL_PASSWORD=user_password #password for non-root user
+    volumes:
+      - ./dbdata:/var/lib/mysql #local backup for database
+    networks: 
+      - db_network #isolated network for database 
+    
+  wordpress:
+    depends_on:
+      - mysql
+    image: wordpress:5.8.1-fpm
+    container_name: wordpress
+    restart: unless-stopped
+    environment:
+      - WORDPRESS_DB_HOST=mysql #database host
+      - WORDPRESS_DB_USER=user #mysql non root user
+      - WORDPRESS_DB_PASSWORD=user_password #password for non root user
+      - WORDPRESS_DB_NAME=default #database name for WordPress
+    volumes:
+      - wordpress_data:/var/www/html #saving container data 
+    networks: 
+      - db_network #isolated network for database
+      - content_network #isolated network for content
+
+  nginx:
+    depends_on: 
+      - wordpress
+    image: nginx:latest
+    restart: unless-stopped
+    command: ["nginx", "-g", "daemon off;"]
+    container_name: nginx
+    ports: 
+    - 80:80
+    volumes:
+    - ./default.conf:/etc/nginx/conf.d/default.conf #change config to reverse-proxy
+    - wordpress_data:/var/www/html #saving container data 
+    networks:
+    - content_network #isolated network for content
+volumes:
+  db_data: {}
+  wordpress_data: {}
