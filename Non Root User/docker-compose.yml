@@ -1,0 +1,56 @@
+version: "3"
+
+networks:
+  db_network:
+    driver: bridge
+  content_network:
+    driver: bridge
+  
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+       - MYSQL_ROOT_PASSWORD=vagrant
+       - MYSQL_DATABASE=wpdatabase
+       - MYSQL_USER=wpuser
+       - MYSQL_PASSWORD=wppass123
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    networks: 
+      - db_network 
+    
+  wordpress:
+    depends_on:
+      - mysql
+    image: wordpress:5.8.1-fpm
+    container_name: wordpress
+    restart: unless-stopped
+    user: www-data
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=wpuser
+      - WORDPRESS_DB_PASSWORD=wppass123
+      - WORDPRESS_DB_NAME=wpdatabase
+    volumes:
+      - wordpress_data:/var/www/html
+    networks: 
+      - db_network 
+      - content_network
+
+  nginx:
+    depends_on: 
+      - wordpress
+    build: nginx
+    command: ["nginx", "-g", "daemon off;"]
+    container_name: nginx
+    ports: 
+    - 80:80
+    volumes:
+    - wordpress_data:/var/www/html
+    networks:
+    - content_network
+volumes:
+  db_data: {}
+  wordpress_data: {}
