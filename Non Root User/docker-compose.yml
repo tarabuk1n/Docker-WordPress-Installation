@@ -49,7 +49,7 @@ services:
     ports: 
     - 80:80
     volumes:
-    - wordpress_data:/var/www/htm #saving container data 
+    - wordpress_data:/var/www/html #saving container data 
     networks:
     - content_network #isolated network for content
 volumes:
