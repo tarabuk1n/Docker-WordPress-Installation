@@ -11,11 +11,9 @@ services:
     image: mysql:8
     container_name: mysql
     restart: unless-stopped
+    env_file: .env
     environment:
-       - MYSQL_ROOT_PASSWORD=password #password for root user
-       - MYSQL_DATABASE=default #database name
-       - MYSQL_USER=user #mysql non root user
-       - MYSQL_PASSWORD=user_password #password for non-root user
+       - MYSQL_DATABASE=wordpress #database name
     volumes:
       - ./dbdata:/var/lib/mysql #local backup for database
     networks: 
@@ -29,9 +27,9 @@ services:
     restart: unless-stopped
     environment:
       - WORDPRESS_DB_HOST=mysql #database host
-      - WORDPRESS_DB_USER=user #mysql non root user
-      - WORDPRESS_DB_PASSWORD=user_password #password for non root user
-      - WORDPRESS_DB_NAME=default #database name for WordPress
+      - WORDPRESS_DB_USER=$MYSQL_USER #mysql non root user
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD #password for non root user
+      - WORDPRESS_DB_NAME=wordpress #database name for WordPress
     volumes:
       - wordpress_data:/var/www/html #saving container data 
     networks: 
