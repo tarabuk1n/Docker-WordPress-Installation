@@ -2,7 +2,7 @@
 
 ![Docker Wordpress](https://www.davidguida.net/assets/uploads/2017/06/dockerPress.png)
 
-Automating WordPress Installation Through Docker:
+Automating WordPress Installation using Docker:
 
 - Configuring MySQL container
 - Configuring Nginx container (reverse-proxy realization)
